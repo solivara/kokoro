@@ -1,0 +1,1 @@
+docker build -t kokoro:gpu-1.0.0 .
