@@ -121,5 +121,6 @@ if __name__ == '__main__':
     parser.add_argument("--port", default=5000)
 
     args = parser.parse_args()
+
     # Start Flask app
     uvicorn.run(app, host=args.host, port=int(args.port))
