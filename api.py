@@ -1,3 +1,5 @@
+import argparse
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
@@ -5,6 +7,8 @@ import numpy as np
 import soundfile as sf
 from kokoro import KModel, KPipeline
 import torch
+
+import uvicorn
 
 app = Flask(__name__)
 CORS(app)
@@ -112,4 +116,10 @@ def list_voices():
 if __name__ == '__main__':
     zh_pipeline = KPipeline(lang_code='z', repo_id=REPO_ID, model=model, en_callable=en_callable)
 
-    app.run(host='0.0.0.0', port=5000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", default=5000)
+
+    args = parser.parse_args()
+    # Start Flask app
+    uvicorn.run(app, host=args.host, port=int(args.port))
