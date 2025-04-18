@@ -8,8 +8,6 @@ import soundfile as sf
 from kokoro import KModel, KPipeline
 import torch
 
-import uvicorn
-
 app = Flask(__name__)
 CORS(app)
 
@@ -123,4 +121,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Start Flask app
-    uvicorn.run(app, host=args.host, port=int(args.port))
+    app.run(host=args.host, port=args.port)
