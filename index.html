@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenAI Speech Synthesis</title>
+    <style>
+        body { font-family: sans-serif; }
+        #voice-select { margin-bottom: 10px; }
+        #output-audio { margin-top: 10px; }
+        #server-url-input { width: 300px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>OpenAI Speech Synthesis</h1>
+
+    <label for="server-url-input">Server URL:</label>
+    <input type="text" id="server-url-input" value="http://127.0.0.1:5000" placeholder="Enter server URL">
+
+    <br>
+
+    <label for="voice-select">Select Voice:</label>
+    <select id="voice-select"></select>
+
+    <br>
+
+    <label for="text-input">Text to Speak:</label><br>
+    <textarea id="text-input" rows="4" cols="50">Hello, this is a test of OpenAI's text-to-speech.</textarea>
+
+    <br>
+
+    <button id="synthesize-button">Synthesize and Play</button>
+
+    <div id="output-audio">
+        <audio id="audio-player" controls autoplay style="width: 100%;"></audio>
+    </div>
+
+    <script>
+        const serverUrlInput = document.getElementById('server-url-input');
+        const voiceSelect = document.getElementById('voice-select');
+        const textInput = document.getElementById('text-input');
+        const synthesizeButton = document.getElementById('synthesize-button');
+        const audioElement = document.getElementById('audio-player');
+
+        async function populateVoices() {
+            const serverUrl = serverUrlInput.value;
+            try {
+                const response = await fetch(`${serverUrl}/v1/voices`); // 假设你的服务在 /v1/voices 提供声音列表
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                voiceSelect.innerHTML = ''; // Clear existing options
+                data.voices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.id;
+                    option.textContent = voice.name;
+                    voiceSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Could not fetch voices:', error);
+                alert('Failed to load voices. Check the console for errors. Make sure the server URL is correct.');
+            }
+        }
+
+        serverUrlInput.addEventListener('change', populateVoices);
+        populateVoices();
+
+        synthesizeButton.addEventListener('click', async () => {
+            const serverUrl = serverUrlInput.value;
+            const selectedVoice = voiceSelect.value;
+            const text = textInput.value;
+
+            try {
+                const response = await fetch(`${serverUrl}/v1/audio/speech`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        voice: selectedVoice,
+                        input: text
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                audioElement.src = audioUrl;
+                audioElement.play();
+
+            } catch (error) {
+                console.error('Synthesis error:', error);
+                alert('Failed to synthesize speech. Check the console for errors.  Make sure the server URL is correct.');
+            }
+        });
+    </script>
+</body>
+</html>
